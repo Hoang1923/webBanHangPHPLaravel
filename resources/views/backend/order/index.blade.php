@@ -50,7 +50,7 @@
                         @elseif($order->status=='delivered')
                           <span class="badge badge-success">Deliveried</span>
                         @else
-                          <span class="badge badge-danger">Cancel</span>
+                          <span class="badge badge-danger">Hủy</span>
                         @endif
                     </td>
                     <td>
