@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Expiry;
 use Illuminate\Support\Str;
+
 class ExpiryController extends Controller
 {
     /**
@@ -14,8 +15,8 @@ class ExpiryController extends Controller
      */
     public function index()
     {
-        $expiry=Expiry::orderBy('id','DESC')->paginate();
-        return view('backend.expiry.index')->with('expiries',$expiry);
+        $expiry = Expiry::orderBy('id', 'DESC')->paginate();
+        return view('backend.expiry.index')->with('expiries', $expiry);
     }
 
     /**
@@ -36,23 +37,22 @@ class ExpiryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request,[
-            'title'=>'string|required',
+        $this->validate($request, [
+            'title' => 'string|required',
         ]);
-        $data=$request->all();
-        $slug=Str::slug($request->title);
-        $count=Expiry::where('slug',$slug)->count();
-        if($count>0){
-            $slug=$slug.'-'.date('ymdis').'-'.rand(0,999);
+        $data = $request->all();
+        $slug = Str::slug($request->title);
+        $count = Expiry::where('slug', $slug)->count();
+        if ($count > 0) {
+            $slug = $slug . '-' . date('ymdis') . '-' . rand(0, 999);
         }
-        $data['slug']=$slug;
+        $data['slug'] = $slug;
         // return $data;
-        $status=Expiry::create($data);
-        if($status){
-            request()->session()->flash('success','Expiry successfully created');
-        }
-        else{
-            request()->session()->flash('error','Error, Please try again');
+        $status = Expiry::create($data);
+        if ($status) {
+            request()->session()->flash('success', 'Expiry successfully created');
+        } else {
+            request()->session()->flash('error', 'Error, Please try again');
         }
         return redirect()->route('expiry.index');
     }
@@ -76,11 +76,11 @@ class ExpiryController extends Controller
      */
     public function edit($id)
     {
-        $expiry=Expiry::find($id);
-        if(!$expiry){
-            request()->session()->flash('error','Expiry not found');
+        $expiry = Expiry::find($id);
+        if (!$expiry) {
+            request()->session()->flash('error', 'Expiry not found');
         }
-        return view('backend.expiry.edit')->with('expiry',$expiry);
+        return view('backend.expiry.edit')->with('expiry', $expiry);
     }
 
 
@@ -93,18 +93,17 @@ class ExpiryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $expiry=Expiry::find($id);
-        $this->validate($request,[
-            'title'=>'string|required',
+        $expiry = Expiry::find($id);
+        $this->validate($request, [
+            'title' => 'string|required',
         ]);
-        $data=$request->all();
-       
-        $status=$expiry->fill($data)->save();
-        if($status){
-            request()->session()->flash('success','expiry successfully updated');
-        }
-        else{
-            request()->session()->flash('error','Error, Please try again');
+        $data = $request->all();
+
+        $status = $expiry->fill($data)->save();
+        if ($status) {
+            request()->session()->flash('success', 'expiry successfully updated');
+        } else {
+            request()->session()->flash('error', 'Error, Please try again');
         }
         return redirect()->route('expiry.index');
     }
@@ -117,19 +116,17 @@ class ExpiryController extends Controller
      */
     public function destroy($id)
     {
-        $expiry=Expiry::find($id);
-        if($expiry){
-            $status=$expiry->delete();
-            if($status){
-                request()->session()->flash('success','expiry successfully deleted');
-            }
-            else{
-                request()->session()->flash('error','Error, Please try again');
+        $expiry = Expiry::find($id);
+        if ($expiry) {
+            $status = $expiry->delete();
+            if ($status) {
+                request()->session()->flash('success', 'expiry successfully deleted');
+            } else {
+                request()->session()->flash('error', 'Error, Please try again');
             }
             return redirect()->route('expiry.index');
-        }
-        else{
-            request()->session()->flash('error','expiry not found');
+        } else {
+            request()->session()->flash('error', 'expiry not found');
             return redirect()->back();
         }
     }

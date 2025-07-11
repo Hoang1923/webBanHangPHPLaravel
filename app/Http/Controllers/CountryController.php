@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Country;
 use Illuminate\Support\Str;
+
 class CountryController extends Controller
 {
     /**
@@ -14,9 +15,9 @@ class CountryController extends Controller
      */
     public function index()
     {
-        $country=Country::orderBy('id','DESC')->paginate();
-         $countries = Country::paginate(10);
-        return view('backend.country.index', compact('countries'))->with('country',$country);
+        $country = Country::orderBy('id', 'DESC')->paginate();
+        $countries = Country::paginate(10);
+        return view('backend.country.index', compact('countries'))->with('country', $country);
     }
 
     /**
@@ -37,23 +38,22 @@ class CountryController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request,[
-            'title'=>'string|required',
+        $this->validate($request, [
+            'title' => 'string|required',
         ]);
-        $data=$request->all();
-        $slug=Str::slug($request->title);
-        $count=Country::where('slug',$slug)->count();
-        if($count>0){
-            $slug=$slug.'-'.date('ymdis').'-'.rand(0,999);
+        $data = $request->all();
+        $slug = Str::slug($request->title);
+        $count = Country::where('slug', $slug)->count();
+        if ($count > 0) {
+            $slug = $slug . '-' . date('ymdis') . '-' . rand(0, 999);
         }
-        $data['slug']=$slug;
+        $data['slug'] = $slug;
         // return $data;
-        $status=Country::create($data);
-        if($status){
-            request()->session()->flash('success','Country successfully created');
-        }
-        else{
-            request()->session()->flash('error','Error, Please try again');
+        $status = Country::create($data);
+        if ($status) {
+            request()->session()->flash('success', 'Country successfully created');
+        } else {
+            request()->session()->flash('error', 'Error, Please try again');
         }
         return redirect()->route('country.index');
     }
@@ -77,11 +77,11 @@ class CountryController extends Controller
      */
     public function edit($id)
     {
-        $country=Country::find($id);
-        if(!$country){
-            request()->session()->flash('error','Country not found');
+        $country = Country::find($id);
+        if (!$country) {
+            request()->session()->flash('error', 'Country not found');
         }
-        return view('backend.country.edit')->with('country',$country);
+        return view('backend.country.edit')->with('country', $country);
     }
 
 
@@ -94,18 +94,17 @@ class CountryController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $country=Country::find($id);
-        $this->validate($request,[
-            'title'=>'string|required',
+        $country = Country::find($id);
+        $this->validate($request, [
+            'title' => 'string|required',
         ]);
-        $data=$request->all();
-       
-        $status=$country->fill($data)->save();
-        if($status){
-            request()->session()->flash('success','country successfully updated');
-        }
-        else{
-            request()->session()->flash('error','Error, Please try again');
+        $data = $request->all();
+
+        $status = $country->fill($data)->save();
+        if ($status) {
+            request()->session()->flash('success', 'country successfully updated');
+        } else {
+            request()->session()->flash('error', 'Error, Please try again');
         }
         return redirect()->route('country.index');
     }
@@ -118,19 +117,17 @@ class CountryController extends Controller
      */
     public function destroy($id)
     {
-        $country=Country::find($id);
-        if($country){
-            $status=$country->delete();
-            if($status){
-                request()->session()->flash('success','country successfully deleted');
-            }
-            else{
-                request()->session()->flash('error','Error, Please try again');
+        $country = Country::find($id);
+        if ($country) {
+            $status = $country->delete();
+            if ($status) {
+                request()->session()->flash('success', 'country successfully deleted');
+            } else {
+                request()->session()->flash('error', 'Error, Please try again');
             }
             return redirect()->route('country.index');
-        }
-        else{
-            request()->session()->flash('error','country not found');
+        } else {
+            request()->session()->flash('error', 'country not found');
             return redirect()->back();
         }
     }

@@ -61,7 +61,7 @@ class FrontendController extends Controller
         $product_detail = Product::getProductBySlug($slug);
 
         if (!$product_detail) {
-            
+
             return redirect()->route('home');
         }
 

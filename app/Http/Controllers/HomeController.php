@@ -29,14 +29,16 @@ class HomeController extends Controller
      */
 
 
-    public function index(){
+    public function index()
+    {
         return view('user.index');
     }
 
-    public function profile(){
-        $profile=Auth()->user();
+    public function profile()
+    {
+        $profile = Auth()->user();
         // return $profile;
-        return view('user.users.profile')->with('profile',$profile);
+        return view('user.users.profile')->with('profile', $profile);
     }
 
     public function profileUpdate(Request $request, $id)
@@ -86,51 +88,50 @@ class HomeController extends Controller
     }
 
     // Order
-    public function orderIndex(){
-        $orders=Order::orderBy('id','DESC')->where('user_id',auth()->user()->id)->paginate(10);
-        return view('user.order.index')->with('orders',$orders);
+    public function orderIndex()
+    {
+        $orders = Order::orderBy('id', 'DESC')->where('user_id', auth()->user()->id)->paginate(10);
+        return view('user.order.index')->with('orders', $orders);
     }
     public function userOrderDelete($id)
     {
-        $order=Order::find($id);
-        if($order){
-           if($order->status=="process" || $order->status=='delivered' || $order->status=='cancel'){
-                return redirect()->back()->with('error','Bạn không thể xóa đơn hàng này bây giờ');
-           }
-           else{
-                $status=$order->delete();
-                if($status){
-                    request()->session()->flash('success','Xóa đơn hàng thành công');
-                }
-                else{
-                    request()->session()->flash('error','Không thể xóa đơn hàng này');
+        $order = Order::find($id);
+        if ($order) {
+            if ($order->status == "process" || $order->status == 'delivered' || $order->status == 'cancel') {
+                return redirect()->back()->with('error', 'Bạn không thể xóa đơn hàng này bây giờ');
+            } else {
+                $status = $order->delete();
+                if ($status) {
+                    request()->session()->flash('success', 'Xóa đơn hàng thành công');
+                } else {
+                    request()->session()->flash('error', 'Không thể xóa đơn hàng này');
                 }
                 return redirect()->route('user.order.index');
-           }
-        }
-        else{
-            request()->session()->flash('error','Đơn hàng không tồn tại');
+            }
+        } else {
+            request()->session()->flash('error', 'Đơn hàng không tồn tại');
             return redirect()->back();
         }
     }
 
     public function orderShow($id)
     {
-        $order=Order::find($id);
+        $order = Order::find($id);
         // return $order;
-        return view('user.order.show')->with('order',$order);
+        return view('user.order.show')->with('order', $order);
     }
     // Product Review
-    public function productReviewIndex(){
-        $reviews=ProductReview::getAllUserReview();
-        return view('user.review.index')->with('reviews',$reviews);
+    public function productReviewIndex()
+    {
+        $reviews = ProductReview::getAllUserReview();
+        return view('user.review.index')->with('reviews', $reviews);
     }
 
     public function productReviewEdit($id)
     {
-        $review=ProductReview::find($id);
+        $review = ProductReview::find($id);
         // return $review;
-        return view('user.review.edit')->with('review',$review);
+        return view('user.review.edit')->with('review', $review);
     }
 
     /**
@@ -142,19 +143,17 @@ class HomeController extends Controller
      */
     public function productReviewUpdate(Request $request, $id)
     {
-        $review=ProductReview::find($id);
-        if($review){
-            $data=$request->all();
-            $status=$review->fill($data)->update();
-            if($status){
-                request()->session()->flash('success','Cập nhật đánh giá thành công');
+        $review = ProductReview::find($id);
+        if ($review) {
+            $data = $request->all();
+            $status = $review->fill($data)->update();
+            if ($status) {
+                request()->session()->flash('success', 'Cập nhật đánh giá thành công');
+            } else {
+                request()->session()->flash('error', 'Có lỗi xảy ra! Vui lòng thử lại!!');
             }
-            else{
-                request()->session()->flash('error','Có lỗi xảy ra! Vui lòng thử lại!!');
-            }
-        }
-        else{
-            request()->session()->flash('error','Đánh giá không tồn tại!!');
+        } else {
+            request()->session()->flash('error', 'Đánh giá không tồn tại!!');
         }
 
         return redirect()->route('user.productreview.index');
@@ -168,47 +167,44 @@ class HomeController extends Controller
      */
     public function productReviewDelete($id)
     {
-        $review=ProductReview::find($id);
-        $status=$review->delete();
-        if($status){
-            request()->session()->flash('success','Xóa đánh giá thành công');
-        }
-        else{
-            request()->session()->flash('error','Có lỗi xảy ra! Vui lòng thử lại');
+        $review = ProductReview::find($id);
+        $status = $review->delete();
+        if ($status) {
+            request()->session()->flash('success', 'Xóa đánh giá thành công');
+        } else {
+            request()->session()->flash('error', 'Có lỗi xảy ra! Vui lòng thử lại');
         }
         return redirect()->route('user.productreview.index');
     }
 
     public function userComment()
     {
-        $comments=PostComment::getAllUserComments();
-        return view('user.comment.index')->with('comments',$comments);
+        $comments = PostComment::getAllUserComments();
+        return view('user.comment.index')->with('comments', $comments);
     }
-    public function userCommentDelete($id){
-        $comment=PostComment::find($id);
-        if($comment){
-            $status=$comment->delete();
-            if($status){
-                request()->session()->flash('success','Bình luận bài viết xóa thành công');
-            }
-            else{
-                request()->session()->flash('error','Có lỗi xảy ra, vui lòng thử lại');
+    public function userCommentDelete($id)
+    {
+        $comment = PostComment::find($id);
+        if ($comment) {
+            $status = $comment->delete();
+            if ($status) {
+                request()->session()->flash('success', 'Bình luận bài viết xóa thành công');
+            } else {
+                request()->session()->flash('error', 'Có lỗi xảy ra, vui lòng thử lại');
             }
             return back();
-        }
-        else{
-            request()->session()->flash('error','Bình luận bài viết không tồn tại');
+        } else {
+            request()->session()->flash('error', 'Bình luận bài viết không tồn tại');
             return redirect()->back();
         }
     }
     public function userCommentEdit($id)
     {
-        $comments=PostComment::find($id);
-        if($comments){
-            return view('user.comment.edit')->with('comment',$comments);
-        }
-        else{
-            request()->session()->flash('error','Bình luận không tồn tại');
+        $comments = PostComment::find($id);
+        if ($comments) {
+            return view('user.comment.edit')->with('comment', $comments);
+        } else {
+            request()->session()->flash('error', 'Bình luận không tồn tại');
             return redirect()->back();
         }
     }
@@ -222,27 +218,25 @@ class HomeController extends Controller
      */
     public function userCommentUpdate(Request $request, $id)
     {
-        $comment=PostComment::find($id);
-        if($comment){
-            $data=$request->all();
+        $comment = PostComment::find($id);
+        if ($comment) {
+            $data = $request->all();
             // return $data;
-            $status=$comment->fill($data)->update();
-            if($status){
-                request()->session()->flash('success','Cập nhật bình luận thành công');
-            }
-            else{
-                request()->session()->flash('error','Có lỗi xảy ra! Vui lòng thử lại!!');
+            $status = $comment->fill($data)->update();
+            if ($status) {
+                request()->session()->flash('success', 'Cập nhật bình luận thành công');
+            } else {
+                request()->session()->flash('error', 'Có lỗi xảy ra! Vui lòng thử lại!!');
             }
             return redirect()->route('user.post-comment.index');
-        }
-        else{
-            request()->session()->flash('error','Bình luận không tồn tại');
+        } else {
+            request()->session()->flash('error', 'Bình luận không tồn tại');
             return redirect()->back();
         }
-
     }
 
-    public function changePassword(){
+    public function changePassword()
+    {
         return view('user.layouts.userPasswordChange');
     }
     public function changPasswordStore(Request $request)
@@ -253,10 +247,8 @@ class HomeController extends Controller
             'new_confirm_password' => ['same:new_password'],
         ]);
 
-        User::find(auth()->user()->id)->update(['password'=> Hash::make($request->new_password)]);
+        User::find(auth()->user()->id)->update(['password' => Hash::make($request->new_password)]);
 
-        return redirect()->route('user')->with('success','Đổi mật khẩu thành công');
+        return redirect()->route('user')->with('success', 'Đổi mật khẩu thành công');
     }
-
-
 }

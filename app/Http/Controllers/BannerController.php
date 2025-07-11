@@ -57,7 +57,7 @@ class BannerController extends Controller
 
         if ($request->hasFile('photo')) {
 
-            
+
             $file = $request->file('photo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
             $path = public_path('images');
@@ -115,70 +115,70 @@ class BannerController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-   
+
     public function update(Request $request, $id)
-{
-    $banner = Banner::findOrFail($id);
+    {
+        $banner = Banner::findOrFail($id);
 
-    // Validate cơ bản
-    $rules = [
-        'title' => 'required|string|max:50',
-        'description' => 'nullable|string',
-        'status' => 'required|in:active,inactive',
-    ];
+        // Validate cơ bản
+        $rules = [
+            'title' => 'required|string|max:50',
+            'description' => 'nullable|string',
+            'status' => 'required|in:active,inactive',
+        ];
 
-    // Chỉ validate ảnh nếu có file
-    if ($request->hasFile('photo')) {
-        $rules['photo'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048000';
+        // Chỉ validate ảnh nếu có file
+        if ($request->hasFile('photo')) {
+            $rules['photo'] = 'image|mimes:jpeg,png,jpg,gif,svg|max:2048000';
+        }
+
+        $this->validate($request, $rules);
+
+        $data = $request->all();
+
+        // Nếu có ảnh mới
+        if ($request->hasFile('photo')) {
+            // Xóa ảnh cũ nếu tồn tại
+            if ($banner->photo && file_exists(public_path($banner->photo))) {
+                unlink(public_path($banner->photo));
+            }
+
+            $file = $request->file('photo');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $filename = time() . '.' . $extension;
+            $path = public_path('images');
+
+            if (!file_exists($path)) {
+                mkdir($path, 0777, true);
+            }
+
+            $img = Image::make($file->getRealPath());
+            if ($img->width() > 1200) {
+                $img->resize(1200, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+            }
+
+            $quality = in_array($extension, ['jpg', 'jpeg']) ? 100 : 0;
+            $img->save($path . '/' . $filename, $quality);
+
+            $data['photo'] = 'images/' . $filename;
+        } else {
+            $data['photo'] = $banner->photo;
+        }
+
+
+        $status = $banner->fill($data)->save();
+
+        if ($status) {
+            request()->session()->flash('success', 'Banner cập nhật thành công');
+        } else {
+            request()->session()->flash('error', 'Có lỗi trong quá trình cập nhật Banner');
+        }
+
+        return redirect()->route('banner.index');
     }
-
-    $this->validate($request, $rules);
-
-    $data = $request->all();
-
-    // Nếu có ảnh mới
-    if ($request->hasFile('photo')) {
-    // Xóa ảnh cũ nếu tồn tại
-    if ($banner->photo && file_exists(public_path($banner->photo))) {
-        unlink(public_path($banner->photo));
-    }
-
-    $file = $request->file('photo');
-    $extension = strtolower($file->getClientOriginalExtension());
-    $filename = time() . '.' . $extension;
-    $path = public_path('images');
-
-    if (!file_exists($path)) {
-        mkdir($path, 0777, true);
-    }
-
-    $img = Image::make($file->getRealPath());
-    if ($img->width() > 1200) {
-        $img->resize(1200, null, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
-    }
-
-    $quality = in_array($extension, ['jpg', 'jpeg']) ? 100 : 0;
-    $img->save($path . '/' . $filename, $quality);
-
-    $data['photo'] = 'images/' . $filename;
-} else {
-    $data['photo'] = $banner->photo;
-}
-
-
-    $status = $banner->fill($data)->save();
-
-    if ($status) {
-        request()->session()->flash('success', 'Banner cập nhật thành công');
-    } else {
-        request()->session()->flash('error', 'Có lỗi trong quá trình cập nhật Banner');
-    }
-
-    return redirect()->route('banner.index');
-}
 
 
 
