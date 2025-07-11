@@ -1,4 +1,5 @@
 @extends('frontend.layouts.master')
+@php use Illuminate\Support\Str; @endphp
 
 @section('title','Jelly-Boutique || Bài Viết')
 
@@ -93,7 +94,7 @@
                                 <!-- Single Post -->
                                 <div class="single-post">
                                     <div class="image">
-                                        <img src="{{secure_asset($post->photo)}}" alt="{{$post->photo}}">
+<img src="{{ secure_asset(Str::replaceFirst('blog/', '', ltrim($post->photo))) }}" alt="{{ $post->title }}">
                                     </div>
                                     <div class="content">
                                         <h5><a href="#">{{$post->title}}</a></h5>
