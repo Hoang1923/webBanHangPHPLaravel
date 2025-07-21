@@ -46,7 +46,9 @@
                                         <label>Email<span>*</span></label>
                                         <input type="text" name="email" placeholder="" required="required" value="{{old('email')}}">
                                         @error('email')
-                                            <span class="text-danger">{{$message}}</span>
+                                            <!-- <span class="text-danger">{{$message}}</span> -->
+                                            <span class="text-danger">Email đã tồn tại</span>
+
                                         @enderror
                                     </div>
                                 </div>

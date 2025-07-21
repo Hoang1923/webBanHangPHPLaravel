@@ -201,7 +201,7 @@ class OrderController extends Controller
         // Cấu hình thông tin người nhận chuyển khoản
         $accountName = 'DANG VAN HOANG';
         $accountNumber = '108874780496';
-        $bankCode = 'ICB'; // Vietcombank
+        $bankCode = 'ICB'; 
         $amount = $order->total_amount;
         $description =  $order->order_number;
 

@@ -208,8 +208,7 @@
           </div>
           <!-- Card Body -->
           <div class="card-body">
-<iframe src="https://public.casso.vn/c06619c5-077e-4b6f-8cd6-6836474c38b2" allowfullscreen="allowfullscreen" style="width: 100%; height: 100vh; border: none;"></iframe>          </div>
-        </div>
+<iframe src="https://public.casso.vn/954d2137-cfde-42d5-93ba-3794fd13470d" allowfullscreen="allowfullscreen" style="width: 100%; height: 100vh; border: none;"></iframe>        </div>
       </div> 
 
       <!-- Pie Chart -->

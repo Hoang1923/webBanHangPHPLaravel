@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Auth;
 use Illuminate\Http\Request;
 use App\Models\Product;
@@ -9,76 +10,79 @@ use App\Models\Cart;
 use App\Models\Order;
 use Illuminate\Support\Str;
 use Helper;
+
 class CartController extends Controller
 {
-    protected $product=null;
-    public function __construct(Product $product){
-        $this->product=$product;
+    protected $product = null;
+    public function __construct(Product $product)
+    {
+        $this->product = $product;
     }
-// Kiểm tra sản phẩm đã có trong giỏ hàng chưa.
-// Nếu đã có thì có thể tăng số lượng thay vì thêm mới.
-// Nếu chưa thì thêm mới sản phẩm vào giỏ.
+    // Kiểm tra sản phẩm đã có trong giỏ hàng chưa.
+    // Nếu đã có thì có thể tăng số lượng thay vì thêm mới.
+    // Nếu chưa thì thêm mới sản phẩm vào giỏ.
 
-public function checkout()
-{
-    $userId = auth()->id();
-    
-    // Lấy order_number vừa truyền qua session flash
-    $order_number = session('order_number');
+    public function checkout()
+    {
+        $userId = auth()->id();
 
-    // Lấy order mới nhất của user
-    $order = Order::where('user_id', $userId)
-                ->where('order_number', $order_number)
-                ->first();
+        // Lấy order_number vừa truyền qua session flash
+        $order_number = session('order_number');
 
-    return view('frontend.pages.checkout', compact('order', 'order_number'));
-}
+        // Lấy order mới nhất của user
+        $order = Order::where('user_id', $userId)
+            ->where('order_number', $order_number)
+            ->first();
 
-
+        return view('frontend.pages.checkout', compact('order', 'order_number'));
+    }
 
 
-    public function addToCart(Request $request){
+
+
+    public function addToCart(Request $request)
+    {
         // dd($request->all());
         if (empty($request->slug)) {
-            request()->session()->flash('error','Sản phẩm không hợp lệ');
+            request()->session()->flash('error', 'Sản phẩm không hợp lệ');
             return back();
         }
         $product = Product::where('slug', $request->slug)->first();
         // return $product;
         if (empty($product)) {
-            request()->session()->flash('error','Sản phẩm không hợp lệ');
+            request()->session()->flash('error', 'Sản phẩm không hợp lệ');
             return back();
         }
 
-        
 
-        $already_cart = Cart::where('user_id', auth()->user()->id)->where('order_id',null)->where('product_id', $product->id)->first();
+
+        $already_cart = Cart::where('user_id', auth()->user()->id)->where('order_id', null)->where('product_id', $product->id)->first();
         // return $already_cart;
-        if($already_cart) {
+        if ($already_cart) {
             // dd($already_cart);
             $already_cart->quantity = $already_cart->quantity + 1;
-            $already_cart->amount = $product->price+ $already_cart->amount;
+            $already_cart->amount = $product->price + $already_cart->amount;
             // return $already_cart->quantity;
-            if ($already_cart->product->stock < $already_cart->quantity || $already_cart->product->stock <= 0) return back()->with('error','Không đủ hàng trong kho!.');
+            if ($already_cart->product->stock < $already_cart->quantity || $already_cart->product->stock <= 0) return back()->with('error', 'Không đủ hàng trong kho!.');
             $already_cart->save();
-
-        }else{
+        } else {
 
             $cart = new Cart;
             $cart->user_id = auth()->user()->id;
             $cart->product_id = $product->id;
-            $cart->price = ($product->price-($product->price*$product->discount)/100);
+            $cart->price = ($product->price - ($product->price * $product->discount) / 100);
             $cart->quantity = 1;
-            $cart->amount=$cart->price*$cart->quantity;
-            if ($cart->product->stock < $cart->quantity || $cart->product->stock <= 0) return back()->with('error','Không đủ hàng trong kho!.');
+            $cart->amount = $cart->price * $cart->quantity;
+            if ($cart->product->stock < $cart->quantity || $cart->product->stock <= 0) return back()->with('error', 'Không đủ hàng trong kho!.');
             $cart->save();
-            $wishlist=Wishlist::where('user_id',auth()->user()->id)->where('cart_id',null)->update(['cart_id'=>$cart->id]);
+            $wishlist = Wishlist::where('user_id', auth()->user()->id)->where('cart_id', null)->update(['cart_id' => $cart->id]);
         }
-        request()->session()->flash('success','Sản phẩm đã được thêm vào giỏ hàng');
+        request()->session()->flash('success', 'Sản phẩm đã được thêm vào giỏ hàng');
         return back();
     }
 
-    public function singleAddToCart(Request $request){
+    public function singleAddToCart(Request $request)
+    {
         $request->validate([
             'slug'      =>  'required',
             'quant'      =>  'required',
@@ -87,88 +91,89 @@ public function checkout()
 
 
         $product = Product::where('slug', $request->slug)->first();
-        if($product->stock <$request->quant[1]){
-            return back()->with('error','Không đủ hàng, bạn có thể thêm sản phẩm khác.');
+        if ($product->stock < $request->quant[1]) {
+            return back()->with('error', 'Không đủ hàng, bạn có thể thêm sản phẩm khác.');
         }
-        if ( ($request->quant[1] < 1) || empty($product) ) {
-            request()->session()->flash('error','Sản phẩm không hợp lệ');
+        if (($request->quant[1] < 1) || empty($product)) {
+            request()->session()->flash('error', 'Sản phẩm không hợp lệ');
             return back();
         }
 
-        $already_cart = Cart::where('user_id', auth()->user()->id)->where('order_id',null)->where('product_id', $product->id)->first();
+        $already_cart = Cart::where('user_id', auth()->user()->id)->where('order_id', null)->where('product_id', $product->id)->first();
 
         // return $already_cart;
 
-        if($already_cart) {
+        if ($already_cart) {
             $already_cart->quantity = $already_cart->quantity + $request->quant[1];
             // $already_cart->price = ($product->price * $request->quant[1]) + $already_cart->price ;
-            $already_cart->amount = ($product->price * $request->quant[1])+ $already_cart->amount;
+            $already_cart->amount = ($product->price * $request->quant[1]) + $already_cart->amount;
 
-            if ($already_cart->product->stock < $already_cart->quantity || $already_cart->product->stock <= 0) return back()->with('error','Không đủ hàng trong kho!.');
+            if ($already_cart->product->stock < $already_cart->quantity || $already_cart->product->stock <= 0) return back()->with('error', 'Không đủ hàng trong kho!.');
 
             $already_cart->save();
-
-        }else{
+        } else {
 
             $cart = new Cart;
             $cart->user_id = auth()->user()->id;
             $cart->product_id = $product->id;
-            $cart->price = ($product->price-($product->price*$product->discount)/100);
+            $cart->price = ($product->price - ($product->price * $product->discount) / 100);
             $cart->quantity = $request->quant[1];
-            $cart->amount=($product->price * $request->quant[1]);
-            if ($cart->product->stock < $cart->quantity || $cart->product->stock <= 0) return back()->with('error','Không đủ hàng trong kho!.');
+            $cart->amount = ($product->price * $request->quant[1]);
+            if ($cart->product->stock < $cart->quantity || $cart->product->stock <= 0) return back()->with('error', 'Không đủ hàng trong kho!.');
             // return $cart;
             $cart->save();
         }
-        request()->session()->flash('success','Sản phẩm đã được thêm vào giỏ hàng.');
+        request()->session()->flash('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
         return back();
     }
 
-    public function cartDelete(Request $request){
+    public function cartDelete(Request $request)
+    {
         $cart = Cart::find($request->id);
         if ($cart) {
             $cart->delete();
-            request()->session()->flash('success','Xóa sản phẩm trong giỏ hàng thành công');
+            request()->session()->flash('success', 'Xóa sản phẩm trong giỏ hàng thành công');
             return back();
         }
-        request()->session()->flash('error','Có lỗi, vui lòng thử lại');
+        request()->session()->flash('error', 'Có lỗi, vui lòng thử lại');
         return back();
     }
 
-    public function cartUpdate(Request $request){
+    public function cartUpdate(Request $request)
+    {
         // dd($request->all());
-        if($request->quant){
+        if ($request->quant) {
             $error = array();
             $success = '';
             // return $request->quant;
-            foreach ($request->quant as $k=>$quant) {
+            foreach ($request->quant as $k => $quant) {
                 // return $k;
                 $id = $request->qty_id[$k];
                 // return $id;
                 $cart = Cart::find($id);
                 // return $cart;
-                if($quant > 0 && $cart) {
+                if ($quant > 0 && $cart) {
                     // return $quant;
 
-                    if($cart->product->stock < $quant){
-                        request()->session()->flash('error','Hết hàng');
+                    if ($cart->product->stock < $quant) {
+                        request()->session()->flash('error', 'Hết hàng');
                         return back();
                     }
                     $cart->quantity = ($cart->product->stock > $quant) ? $quant  : $cart->product->stock;
                     // return $cart;
 
-                    if ($cart->product->stock <=0) continue;
-                    $after_price=($cart->product->price-($cart->product->price*$cart->product->discount)/100);
+                    if ($cart->product->stock <= 0) continue;
+                    $after_price = ($cart->product->price - ($cart->product->price * $cart->product->discount) / 100);
                     $cart->amount = $after_price * $quant;
                     // return $cart->price;
                     $cart->save();
                     $success = 'Cập nhật giỏ hàng thành công!';
-                }else{
+                } else {
                     $error[] = 'Giỏ hàng không hợp lệ!';
                 }
             }
             return back()->with($error)->with('success', $success);
-        }else{
+        } else {
             return back()->with('Giỏ hàng không hợp lệ!');
         }
     }
